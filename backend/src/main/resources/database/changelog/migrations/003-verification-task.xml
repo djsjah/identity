@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2026-11-07-003-verification-task" author="mlops10">
+        <createTable tableName="verification_task">
+            <column name="image_id" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="content_type" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="attempts" type="INTEGER" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="next_attempt_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_dispatched_at" type="TIMESTAMP"/>
+            <column name="started_at" type="TIMESTAMP"/>
+            <column name="finished_at" type="TIMESTAMP"/>
+            <column name="error_code" type="VARCHAR(32)"/>
+            <column name="predicted_class" type="INTEGER"/>
+            <column name="class_description" type="VARCHAR(16)"/>
+            <column name="fake_probability" type="DOUBLE PRECISION"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="verification_task"
+                baseColumnNames="image_id"
+                referencedTableName="image"
+                referencedColumnNames="id"
+                constraintName="fk_verification_task_image"/>
+
+        <addForeignKeyConstraint
+                baseTableName="verification_task"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_verification_task_user"/>
+
+        <createIndex tableName="verification_task" indexName="idx_verification_task_dispatch">
+            <column name="status"/>
+            <column name="next_attempt_at"/>
+            <column name="last_dispatched_at"/>
+        </createIndex>
+
+        <createIndex tableName="verification_task" indexName="idx_verification_task_lease">
+            <column name="status"/>
+            <column name="started_at"/>
+        </createIndex>
+
+        <createIndex tableName="verification_task" indexName="idx_verification_task_user">
+            <column name="user_id"/>
+        </createIndex>
+
+        <sql dbms="postgresql">
+            ALTER TABLE verification_task
+            ADD CONSTRAINT chk_verification_task_attempts
+            CHECK (attempts >= 0);
+
+            ALTER TABLE verification_task
+            ADD CONSTRAINT chk_verification_task_probability
+            CHECK (fake_probability IS NULL OR fake_probability BETWEEN 0.0 AND 1.0);
+        </sql>
+    </changeSet>
+</databaseChangeLog>

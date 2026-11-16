@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2026-11-06-001-init" author="mlops10">
+        <createTable tableName="users">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="username" type="VARCHAR(255)">
+                <constraints
+                        nullable="false"
+                        unique="true"
+                        uniqueConstraintName="uk_users_username"/>
+            </column>
+
+            <column name="email" type="VARCHAR(255)">
+                <constraints
+                        nullable="false"
+                        unique="true"
+                        uniqueConstraintName="uk_users_email"/>
+            </column>
+
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="user_version">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="username" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="valid_from" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="valid_to" type="TIMESTAMP"/>
+
+            <column name="change_reason" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createTable tableName="model_version">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="version" type="VARCHAR(50)">
+                <constraints
+                        nullable="false"
+                        unique="true"
+                        uniqueConstraintName="uk_model_version_version"/>
+            </column>
+
+            <column name="feature_version" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="dataset_version" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="is_active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="image">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="filepath" type="VARCHAR(1024)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="upload_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="verification_history">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="image_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="model_version_id" type="BIGINT"/>
+
+            <column name="verification_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="result" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="auth_session">
+            <column name="token_hash" type="VARCHAR(64)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="expires_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="user_version"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_user_version_user"/>
+
+        <addForeignKeyConstraint
+                baseTableName="verification_history"
+                baseColumnNames="image_id"
+                referencedTableName="image"
+                referencedColumnNames="id"
+                constraintName="fk_verification_image"/>
+
+        <addForeignKeyConstraint
+                baseTableName="verification_history"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_verification_user"/>
+
+        <addForeignKeyConstraint
+                baseTableName="verification_history"
+                baseColumnNames="model_version_id"
+                referencedTableName="model_version"
+                referencedColumnNames="id"
+                constraintName="fk_verification_model_version"/>
+
+        <addForeignKeyConstraint
+                baseTableName="auth_session"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_auth_session_user"
+                onDelete="CASCADE"/>
+
+        <addUniqueConstraint
+                tableName="user_version"
+                columnNames="user_id, version"
+                constraintName="uk_user_version_user_version"/>
+
+        <sql dbms="postgresql">
+            ALTER TABLE user_version
+            ADD CONSTRAINT chk_user_version_dates
+            CHECK (valid_to IS NULL OR valid_to > valid_from);
+
+            ALTER TABLE auth_session
+            ADD CONSTRAINT chk_auth_session_dates
+            CHECK (expires_at > created_at);
+        </sql>
+    </changeSet>
+</databaseChangeLog>

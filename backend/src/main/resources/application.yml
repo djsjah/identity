@@ -1,0 +1,104 @@
+server:
+  port: ${SERVER_PORT}
+
+spring:
+  config:
+    import: "file:./.env[.properties]"
+
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: true
+
+  application:
+    name: identity-backend
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+
+  liquibase:
+    enabled: true
+    change-log: classpath:database/changelog/database.changelog-master.xml
+    contexts: ${LIQUIBASE_CONTEXTS:}
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
+logging:
+  level:
+    org.springframework.security.web.csrf.CsrfAuthenticationStrategy: DEBUG
+    org.springframework.security.web.csrf.CsrfFilter: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+  api-docs:
+    path: /v3/api-docs
+
+app:
+  public-url: ${APP_PUBLIC_URL}
+
+  api-response:
+    success-message: Success
+
+  auth:
+    response:
+      logout-message: You have successfully logged out
+
+  verification:
+    dispatch-interval-ms: 2000
+    worker-enabled: true
+
+  ml:
+    predict-url: ${ML_PREDICT_URL}
+    connect-timeout: 3s
+    read-timeout: 15s
+
+  security:
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+    session:
+      ttl: 2h
+      remember-me-ttl: 14d
+      cleanup-interval: 1h
+      secure-cookie: ${SESSION_COOKIE_SECURE}
+
+    rate-limit:
+      window: 1m
+      login-attempts: 10
+      requests-per-ip: 60
+      reset-attempts: 5
+      max-entries: 10000
+
+    password-reset:
+      confirmation-code: ${PASSWORD_RESET_CONFIRMATION_CODE}
+
+  storage:
+    s3:
+      path-style-access: true
+      endpoint: ${STORAGE_S3_ENDPOINT}
+      region: us-east-1
+      bucket: ${STORAGE_S3_BUCKET}
+      access-key: ${STORAGE_S3_ACCESS_KEY}
+      secret-key: ${STORAGE_S3_SECRET_KEY}
+      api-call-timeout: 15s
+      api-call-attempt-timeout: 5s
+      max-object-size: 5MB

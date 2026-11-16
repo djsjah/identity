@@ -1,0 +1,6 @@
+name: identity
+
+include:
+  - ./postgres/docker-compose.yml
+  - ./rabbitmq/docker-compose.yml
+  - ./seaweedfs/docker-compose.yml

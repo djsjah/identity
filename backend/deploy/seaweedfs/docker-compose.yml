@@ -1,0 +1,22 @@
+x-required-env:
+  STORAGE_S3_PORT: ${STORAGE_S3_PORT:?required}
+
+services:
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.52
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+    environment:
+      AWS_ACCESS_KEY_ID: ${STORAGE_S3_ACCESS_KEY:?required}
+      AWS_SECRET_ACCESS_KEY: ${STORAGE_S3_SECRET_KEY:?required}
+      S3_BUCKET: ${STORAGE_S3_BUCKET:?required}
+
+    ports:
+      - "127.0.0.1:${STORAGE_S3_PORT}:8333"
+
+    volumes:
+      - seaweedfs_data:/data
+
+volumes:
+  seaweedfs_data:
