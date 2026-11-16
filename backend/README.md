@@ -30,7 +30,6 @@
 - **Swagger UI:** http://localhost:8080/swagger-ui.html
 - **OpenAPI JSON:** http://localhost:8080/v3/api-docs
 - **RabbitMQ Management:** http://localhost:15672
-- **SeaweedFS (S3 API):** http://localhost:8333
 
 
 
@@ -96,6 +95,7 @@
 Оба эндпоинта требуют авторизации.
 
 - `POST /images/upload` — загрузка изображения для проверки. Принимает `multipart/form-data` с полем `file` (JPEG/PNG, до 5 МБ). Возвращает `202 Accepted` с `imageId` и `status: PENDING`
+
 - `GET /images/{imageId}/result` — получение состояния и результата проверки по идентификатору изображения. Возвращает `imageId`, `status`, `predictedClass`, `classDescription`, `fakeProbability`, `error`. Пользователь может получать результаты только своих изображений
 
 Возможные статусы: `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`.
@@ -121,7 +121,7 @@
 - `GET /admin/verification-history/search` — поиск записей по `imageId`, `userId`, `verificationDate` или `result`
 - `DELETE /admin/verification-history/delete/{id}` — удаление записи истории проверки
 
-Для списков и поиска используются параметры `page` (по умолчанию `0`) и `size` (по умолчанию `20`, максимум `100`). Ответ содержит `pagination` и `items`.
+Для списков и поиска используются параметры `page` (по умолчанию `0`) и `size` (по умолчанию `20`, максимум `100`). Ответ содержит информацию о пагинации и список найденных записей.
 
 Ошибки API возвращаются в формате `statusCode`, `message`, `data`.
 
